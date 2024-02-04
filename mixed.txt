@@ -2,4 +2,4 @@ this is the first line
 the     second
 {{ third_line }}
 
-the previous line was blank, this has an {{ 4 + 5 }}  on it
+the previous line was blank, this has an {{ 4 + 5 }}{{ 3 * testing }} on it
