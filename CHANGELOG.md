@@ -2,6 +2,13 @@
 
 
 
+## v0.2.0 (2024-03-03)
+
+### Feature
+
+* feat: improve type inference ([`f00b640`](https://github.com/eugene-prout/yatla/commit/f00b640ed01bb165c472985eb8fb89d359490bf4))
+
+
 ## v0.1.0 (2024-03-03)
 
 ### Feature
