@@ -9,6 +9,7 @@ YATLA is a templating engine with a simple templating language specifically desi
 - [x] Write own lexer to respect whitespace
 - [x] Write own own parsing system
 - [ ] Add template validation (preventing non-unique identifiers...)
+- [ ] Publish as pip-installable package
 - [ ] Add foreach loops
 - [ ] Add numerical function calls (round, max, min...)
 
