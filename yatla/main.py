@@ -1,7 +1,7 @@
 import re
 import click
-from lexer import Scanner
-from _parser import parse
+from yatla.lexer import Scanner
+from yatla._parser import parse
 
 
 @click.group()
@@ -53,6 +53,8 @@ def type(filepath):
 
     print(doc.get_parameters())
 
+def main():
+    cli()
 
 if __name__ == "__main__":
-    cli()
+    main()

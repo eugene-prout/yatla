@@ -1,6 +1,6 @@
 from __future__ import annotations
 import operator
-from ast_nodes import (
+from yatla.ast_nodes import (
     BinOpASTNode,
     DocumentASTNode,
     ExpressionASTNode,
@@ -12,7 +12,7 @@ from ast_nodes import (
 )
 
 
-from lexer import Token, TokenType, Scanner
+from yatla.lexer import Token, TokenType, Scanner
 
 
 class TokenSource:

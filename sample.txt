@@ -1,0 +1,5 @@
+This is the starter template.
+
+This line contains a {{ slot }}.
+
+Slots can also contain mathematical expressions: {{ 3 + factor * 7 }}.
