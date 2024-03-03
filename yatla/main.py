@@ -2,6 +2,7 @@ import re
 import click
 from yatla.lexer import Scanner
 from yatla._parser import parse
+from yatla.validation import compute_parameters
 
 
 @click.group()
@@ -51,7 +52,9 @@ def type(filepath):
     text = open(filepath).read()
     doc = parse(Scanner(text))
 
-    print(doc.get_parameters())
+    paramters = compute_parameters(doc.get_parameters())
+
+    print(paramters)
 
 def main():
     cli()

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Callable
+from typing import Callable, Optional
 
 
 class Type(Enum):
@@ -10,12 +10,17 @@ class Type(Enum):
     Num = 2
     Any = 3
 
+@dataclass(frozen=True)
+class Constraint:
+    identifier: str
+    type: Type
+
 
 class ASTNode:
     def eval(self, context):
         raise NotImplementedError
 
-    def get_parameters(self, type: Type = None):
+    def get_parameters(self, type: Type = None) -> list[Optional[Constraint]]:
         raise NotImplementedError
 
 
@@ -26,11 +31,11 @@ class IndentiferASTNode(ASTNode):
     def eval(self, context):
         return context[self.value]
 
-    def get_parameters(self, type: Type = None):
+    def get_parameters(self, type: Type = None) -> list[Optional[Constraint]]:
         if type is None:
-            return [(self.value, Type.Any)]
+            return [Constraint(self.value, Type.Any)]
         else:
-            return [(self.value, type)]
+            return [Constraint(self.value, type)]
 
 
 @dataclass
@@ -40,8 +45,8 @@ class NumberASTNode(ASTNode):
     def eval(self, context):
         return self.value
 
-    def get_parameters(self, type: Type = None):
-        return None
+    def get_parameters(self, type: Type = None) -> list[Optional[Constraint]]:
+        return [None]
 
 
 @dataclass
@@ -51,7 +56,7 @@ class ExpressionASTNode(ASTNode):
     def eval(self, context):
         return self.value.eval(context)
 
-    def get_parameters(self, type: Type = None):
+    def get_parameters(self, type: Type = None) -> list[Optional[Constraint]]:
         return self.value.get_parameters(type)
 
 
@@ -64,7 +69,7 @@ class BinOpASTNode(ASTNode):
     def eval(self, context):
         return self.operator(self.lhs.eval(context), self.rhs.eval(context))
 
-    def get_parameters(self, type: Type = None):
+    def get_parameters(self, type: Type = None) -> list[Optional[Constraint]]:
         all_parameters = []
         arguments = [self.lhs, self.rhs]
         parameter_types = [Type.Num, Type.Num]
@@ -83,7 +88,7 @@ class ExpressionBlockASTNode(ASTNode):
     def eval(self, context):
         return str(self.value.eval(context))
 
-    def get_parameters(self, type: Type = None):
+    def get_parameters(self, type: Type = None) -> list[Optional[Constraint]]:
         return self.value.get_parameters()
 
 
@@ -94,8 +99,8 @@ class TextASTNode(ASTNode):
     def eval(self, context):
         return self.value
 
-    def get_parameters(self, type: Type = None):
-        return None
+    def get_parameters(self, type: Type = None) -> list[Optional[Constraint]]:
+        return [None]
 
 
 @dataclass
@@ -105,10 +110,11 @@ class LineASTNode(ASTNode):
     def eval(self, context):
         return "".join(node.eval(context) for node in self.content)
 
-    def get_parameters(self, type: Type = None):
+    def get_parameters(self, type: Type = None) -> list[Optional[Constraint]]:
         all_params = []
         for node in self.content:
-            all_params.extend(node.get_parameters())
+            if val := node.get_parameters():
+                all_params.extend(val)
         return [p for p in all_params if p is not None]
 
 
@@ -119,7 +125,7 @@ class DocumentASTNode(ASTNode):
     def eval(self, context):
         return "\n".join(l.eval(context) for l in self.lines)
 
-    def get_parameters(self, type: Type = None):
+    def get_parameters(self, type: Type = None) -> list[Constraint]:
         params = []
         for line in self.lines:
             params.extend(line.get_parameters())

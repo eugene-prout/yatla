@@ -8,10 +8,11 @@ YATLA is a templating engine with a simple templating language specifically desi
 - [x] Add type inference. Go from a template -> list of typed parameters
 - [x] Write own lexer to respect whitespace
 - [x] Write own own parsing system
-- [ ] Add template validation (preventing non-unique identifiers...)
-- [ ] Publish as pip-installable package
+- [x] Add template validation (preventing non-unique identifiers...)
+- [x] Publish as pip-installable package
 - [ ] Add foreach loops
-- [ ] Add numerical function calls (round, max, min...)
+- [ ] Add numerical function calls (round, max, min...) (maybe not just numerical? string.capitalise?)
+- [ ] Think about object accessors
 
 ## Contributing
 
