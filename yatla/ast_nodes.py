@@ -124,9 +124,6 @@ class LineASTNode(ASTNode):
                 all_params.extend(val)
         return [p for p in all_params if p is not None]
 
-@dataclass
-class EndForEachBlockASTNode():
-    pass
 
 @dataclass
 class ForEachBlockASTNode(ASTNode):

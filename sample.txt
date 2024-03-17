@@ -1,4 +1,13 @@
+This is the starter template.
+
+This line contains a {{ slot }}.
+
+Slots can also contain mathematical expressions: {{ 3 + factor * 7 }}.
+With full support for operator precedence: {{ (3 + factor) * 7 }}.
+
+Foreach loops are also valid. For example:
+
 This is the {{ factor }} times table:
 {{ foreach num in num_list }}
-{{ factor }} * {{ num }} = {{ factor * num }}
+    {{ factor }} * {{ num }} = {{ factor * num }}
 {{ endforeach }}

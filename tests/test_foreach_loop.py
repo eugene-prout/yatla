@@ -12,14 +12,13 @@ from yatla.ast_nodes import (
 from yatla.lexer import Scanner
 
 
-def test_template_evaluation():
+def test_foreach_parsing():
     template = (
         "This is the {{ factor }} times table:\n"
         "{{ foreach num in num_list }}\n"
         "{{ factor }} * {{ num }} = {{ factor * num }}\n"
         "{{ endforeach }}"
-    )
-    print(template)
+    )  # fmt: skip
 
     ast = parse(Scanner(template))
 
@@ -63,5 +62,31 @@ def test_template_evaluation():
             ),
         ]
     )
-    
+
+    assert ast == expected
+
+
+def test_foreach_with_endforeach_being_last_token_in_file():
+    template = (
+        "{{ foreach x in y }}\n"
+        "x\n" 
+        "{{ endforeach }}"
+    )  # fmt: skip
+
+    ast = parse(Scanner(template))
+
+    expected = DocumentASTNode(
+        lines=[
+            LineASTNode(
+                content=[
+                    ForEachBlockASTNode(
+                        iterand="x",
+                        iterator="y",
+                        body=[LineASTNode(content=[TextASTNode(value="x")])],
+                    )
+                ]
+            )
+        ]
+    )
+
     assert ast == expected

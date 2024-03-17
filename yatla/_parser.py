@@ -1,10 +1,8 @@
 from __future__ import annotations
-import operator
 from yatla.ast_nodes import (
     BinOpASTNode,
     BuiltinFunctionType,
     DocumentASTNode,
-    EndForEachBlockASTNode,
     ExpressionASTNode,
     ExpressionBlockASTNode,
     ForEachBlockASTNode,
@@ -42,13 +40,6 @@ class Parser:
     def advance(self):
         self.current_token = self.tokens.get_next_token()
 
-    def parse_identifier(self) -> IndentiferASTNode:
-        self.assert_current_token_in_set([TokenType.STRING])
-        print(self.current_token)
-        value = self.current_token.literal
-        self.advance()
-        return IndentiferASTNode(value)
-
     # <expression> ::= <add-expr>
     #   string, number or (
     # <add-expr> ::= <mul-expr> (['+' | '-'] <mul-expr>)*
@@ -57,9 +48,6 @@ class Parser:
     #   string, number or (
     # <atomic> ::= [<literal> | <variable> | '(' <expression> ')'
     #     string, number or (
-    def parse_expression(self) -> ExpressionASTNode:
-        pass
-
     def parse_atom(self) -> IndentiferASTNode | NumberASTNode | ExpressionASTNode:
         self.assert_current_token_in_set(
             [TokenType.STRING, TokenType.NUMBER, TokenType.LEFT_PAREN]
@@ -144,6 +132,20 @@ class Parser:
                 break
         return term
 
+    def parse_foreach_line(self) -> LineASTNode:
+        self.assert_current_token_in_set(
+            [TokenType.LEFT_DOUBLE_CURLY_PAREN, TokenType.STRING, TokenType.NEWLINE]
+        )
+
+        content = []
+
+        while self.current_token.type not in [TokenType.NEWLINE, TokenType.EOF]:
+            if self.current_token.type == TokenType.LEFT_DOUBLE_CURLY_PAREN:
+                content.append(self.parse_template_expression())
+            elif self.current_token.type == TokenType.STRING:
+                content.append(self.parse_text())
+        return LineASTNode(content)
+
     def parse_foreach_block(self) -> ForEachBlockASTNode:
         self.assert_current_token_in_set([TokenType.LEFT_DOUBLE_CURLY_PAREN])
         self.advance()
@@ -178,19 +180,25 @@ class Parser:
                 self.tokens.lexer.trim_whitespace()
                 self.advance()
                 next_token = self.current_token
-                if next_token.type == TokenType.ENDFOREACH:
+                if next_token.type == TokenType.FOREACH:
+                    raise ValueError("Cannot nest foreach loops.")
+                elif next_token.type == TokenType.ENDFOREACH:
                     self.advance()
                     
                     self.assert_current_token_in_set([TokenType.RIGHT_DOUBLE_CURLY_PAREN])
                     self.tokens.lexer.keep_whitespace()
                     self.advance()
+                    line_ending_tok = self.current_token
+                    if line_ending_tok.type == TokenType.EOF:
+                        break
+                    self.assert_current_token_in_set([TokenType.NEWLINE], "Expected newline after endforeach block.")
                     break
                 else:
                     self.tokens.push_back_token(next_token)
                     self.current_token = line_start_token
                     self.tokens.lexer.keep_whitespace()
 
-            parsed_line = self.parse_line()
+            parsed_line = self.parse_foreach_line()
 
             body.append(parsed_line)
             line_ending_tok = self.current_token
@@ -208,8 +216,11 @@ class Parser:
     
     def parse_template_expression(self) -> ExpressionBlockASTNode:
         self.assert_current_token_in_set([TokenType.LEFT_DOUBLE_CURLY_PAREN])
+        self.tokens.lexer.trim_whitespace()
         self.advance()
 
+        if self.current_token.type == TokenType.FOREACH:
+            raise ValueError("Foreach loop declarations must be the first expression on a line.")
         self.assert_current_token_in_set(
             [TokenType.STRING, TokenType.NUMBER, TokenType.LEFT_PAREN]
         )
@@ -231,6 +242,10 @@ class Parser:
 
         next_token = self.current_token
         node = None
+
+        if self.current_token.type == TokenType.ENDFOREACH:
+            raise ValueError("Unexpected endforeach block.")
+
         self.assert_current_token_in_set(
             [TokenType.STRING, TokenType.NUMBER, TokenType.LEFT_PAREN, TokenType.FOREACH]
         )
@@ -303,12 +318,6 @@ class Parser:
         if self.current_token.type not in expected:
             if not message:
                 message = f"Parser error. Current token: {self.current_token} but expected {expected}."
-            raise ValueError(message)
-
-    def assert_token_in_set(actual: Token, expected: list[Token], message: str):
-        if actual in expected:
-            return actual
-        else:
             raise ValueError(message)
 
 
