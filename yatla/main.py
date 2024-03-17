@@ -64,8 +64,10 @@ def type(filepath):
 
     print(paramters)
 
+
 def main():
     cli()
+
 
 if __name__ == "__main__":
     main()

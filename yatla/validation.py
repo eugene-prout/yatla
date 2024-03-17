@@ -18,6 +18,7 @@ class Constraint:
     identifier: str
     type: Type
 
+
 @dataclass
 class Parameter:
     identfier: str
@@ -32,7 +33,9 @@ def make_unique(constraints: list[Constraint]):
     return list(dict.fromkeys(constraints))
 
 
-def group_constraints_by_identifier(constraints: list[Constraint]) -> dict[str, list[Type]]:
+def group_constraints_by_identifier(
+    constraints: list[Constraint],
+) -> dict[str, list[Type]]:
     sorted_constraints = sorted(constraints, key=attrgetter("identifier"))
 
     grouped_constraints = {}

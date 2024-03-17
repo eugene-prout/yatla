@@ -7,18 +7,20 @@ from typing import Any, Callable, Optional
 
 from yatla.validation import Constraint, Type, convert_to_shared_subtype
 
+
 class BuiltinFunctionType(Enum):
-    # Arithmetic 
+    # Arithmetic
     ADD = 1
     SUBTRACT = 2
     MULTIPLY = 3
     DIVIDE = 4
 
+
 FUNCTION_LOOKUP: dict[str, Callable[[Any, Any], Any]] = {
     BuiltinFunctionType.ADD: operator.__add__,
     BuiltinFunctionType.SUBTRACT: operator.__sub__,
     BuiltinFunctionType.MULTIPLY: operator.__mul__,
-    BuiltinFunctionType.DIVIDE: operator.__truediv__
+    BuiltinFunctionType.DIVIDE: operator.__truediv__,
 }
 
 
@@ -146,7 +148,6 @@ class ForEachBlockASTNode(ASTNode):
                 body_params.extend(val)
 
         iterand_types = [p.type for p in body_params if p.identifier == self.iterand]
-        
 
         iterand_type = None
         if len(iterand_types) == 1:
@@ -155,7 +156,7 @@ class ForEachBlockASTNode(ASTNode):
             iterand_type = Type.Num
         else:
             raise ValueError("Using array of mixed type")
-        
+
         iterator_type = None
         if iterand_type == Type.Num:
             iterator_type = Type.NumArray
@@ -167,6 +168,7 @@ class ForEachBlockASTNode(ASTNode):
         body_params = [p for p in body_params if p.identifier != self.iterand]
         body_params.append(Constraint(self.iterator, iterator_type))
         return body_params
+
 
 @dataclass
 class DocumentASTNode(ASTNode):
