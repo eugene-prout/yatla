@@ -16,18 +16,19 @@ class TokenType(Enum):
     LEFT_PAREN = 7
     RIGHT_PAREN = 8
     DOT = 9
+    COMMA = 10
 
     #   Literals.
-    STRING = 10
-    NUMBER = 11
+    STRING = 11
+    NUMBER = 12
 
     #   Keywords.
-    FOREACH = 12
-    ENDFOREACH = 13
-    IN = 14
+    FOREACH = 13
+    ENDFOREACH = 14
+    IN = 15
 
-    NEWLINE = 15
-    EOF = 16
+    NEWLINE = 16
+    EOF = 17
 
 
 @dataclass
@@ -46,7 +47,7 @@ string_chars_without_nl = [c for c in printable_characters if c not in ["\n"]]
 identifer_chars = [
     c
     for c in list(string.digits + string.ascii_letters + string.punctuation)
-    if c not in ["(", ")"]
+    if c not in ["(", ")", ","]
 ]
 
 
@@ -126,6 +127,9 @@ class Scanner:
             elif self.break_on_whitespace and c == ")":
                 self.current += 1
                 yield self.add_token(TokenType.RIGHT_PAREN)
+            elif self.break_on_whitespace and c == ",":
+                self.current += 1
+                yield self.add_token(TokenType.COMMA)
             elif c in string.printable:
                 if self.break_on_whitespace:
                     # break on whitespace and emit string

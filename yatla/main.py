@@ -38,7 +38,7 @@ def eval(filepath, data: tuple[str, ...]):
 
     for k in data.keys():
         value = data[k]
-        if re.match(r"^-?\d+", value):
+        if re.match(r"^-?\d+$", value):
             data[k] = int(value)
         elif re.match(r"^-?\d+\.\d+$", value):
             data[k] = float(value)

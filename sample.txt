@@ -11,3 +11,7 @@ This is the {{ factor }} times table:
 {{ foreach num in num_list }}
     {{ factor }} * {{ num }} = {{ factor * num }}
 {{ endforeach }}
+
+There is a also standard library of mathematical functions.
+Comparing {{ factor }} and {{ num }}, the largest is {{ Maximum(factor, num) }} and the smallest is {{ Minimum(factor, num) }}.
+{{ RoundUp(15, 2) }} = 16, and {{ RoundDown(15, 2) }} = 14. 

@@ -6,6 +6,7 @@ import operator
 from typing import Any, Callable, Optional
 
 from yatla.validation import Constraint, Type, convert_to_shared_subtype
+import yatla.builtins
 
 
 class BuiltinFunctionType(Enum):
@@ -15,12 +16,24 @@ class BuiltinFunctionType(Enum):
     MULTIPLY = 3
     DIVIDE = 4
 
+    ROUNDUP = 5
+    ROUNDDOWN = 6
+    MINIMUM = 7
+    MAXIMUM = 8
+
 
 FUNCTION_LOOKUP: dict[str, Callable[[Any, Any], Any]] = {
     BuiltinFunctionType.ADD: operator.__add__,
     BuiltinFunctionType.SUBTRACT: operator.__sub__,
     BuiltinFunctionType.MULTIPLY: operator.__mul__,
     BuiltinFunctionType.DIVIDE: operator.__truediv__,
+}
+
+BUILTIN_FUNCTION_LOOKUP = {
+    BuiltinFunctionType.ROUNDUP: (yatla.builtins.RoundUp, 2, [Type.Num, Type.Num]),
+    BuiltinFunctionType.ROUNDDOWN: (yatla.builtins.RoundDown, 2, [Type.Num, Type.Num]),
+    BuiltinFunctionType.MINIMUM: (yatla.builtins.Minimum, 2, [Type.Num, Type.Num]),
+    BuiltinFunctionType.MAXIMUM: (yatla.builtins.Maximum, 2, [Type.Num, Type.Num]),
 }
 
 
@@ -66,6 +79,31 @@ class ExpressionASTNode(ASTNode):
 
     def get_parameters(self, type: Type = None) -> list[Optional[Constraint]]:
         return self.value.get_parameters(type)
+
+
+@dataclass
+class FunctionCallASTNode(ASTNode):
+    function_identifier: IndentiferASTNode
+    arguments: list[ExpressionASTNode]
+
+    def eval(self, context):
+        evaluated_args = [a.eval(context) for a in self.arguments]
+        function, arity, _ = BUILTIN_FUNCTION_LOOKUP[self.function_identifier]
+        if arity != len(evaluated_args):
+            message = f"Invalid number of arguments. {self.function_identifier} requires {arity} arguments. {len(evaluated_args)} were provided."
+            raise ValueError(message)
+
+        return function(*evaluated_args)
+
+    def get_parameters(self, type: Type = None) -> list[Constraint]:
+        all_params = []
+
+        _, _, expected_types = BUILTIN_FUNCTION_LOOKUP[self.function_identifier]
+
+        for node, type in zip(self.arguments, expected_types):
+            if val := node.get_parameters(type):
+                all_params.extend(val)
+        return [p for p in all_params if p is not None]
 
 
 @dataclass

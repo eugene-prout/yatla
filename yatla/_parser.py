@@ -6,6 +6,7 @@ from yatla.ast_nodes import (
     ExpressionASTNode,
     ExpressionBlockASTNode,
     ForEachBlockASTNode,
+    FunctionCallASTNode,
     IndentiferASTNode,
     LineASTNode,
     NumberASTNode,
@@ -40,6 +41,24 @@ class Parser:
     def advance(self):
         self.current_token = self.tokens.get_next_token()
 
+    def parse_argument_list(self) -> list[ExpressionBlockASTNode]:
+        self.assert_current_token_in_set(
+            [TokenType.STRING, TokenType.NUMBER, TokenType.LEFT_PAREN]
+        )
+        args = []
+        while True:
+            args.append(self.parse_add_expression())
+
+            if self.current_token.type == TokenType.COMMA:
+                self.advance()
+                if self.current_token.type == TokenType.RIGHT_PAREN:
+                    raise ValueError(
+                        "Unexpected end of argument list. Expected term after comma."
+                    )
+            if self.current_token.type == TokenType.RIGHT_PAREN:
+                break
+        return args
+
     # <expression> ::= <add-expr>
     #   string, number or (
     # <add-expr> ::= <mul-expr> (['+' | '-'] <mul-expr>)*
@@ -55,7 +74,27 @@ class Parser:
         if self.current_token.type == TokenType.STRING:
             val = self.current_token.literal
             self.advance()
-            return IndentiferASTNode(val)
+            if self.current_token.type == TokenType.LEFT_PAREN:
+                if val == "RoundUp":
+                    val = BuiltinFunctionType.ROUNDUP
+                elif val == "RoundDown":
+                    val = BuiltinFunctionType.ROUNDDOWN
+                elif val == "Minimum":
+                    val = BuiltinFunctionType.MINIMUM
+                elif val == "Maximum":
+                    val = BuiltinFunctionType.MAXIMUM
+                else:
+                    raise ValueError(f"Unknown function: {val}.")
+                self.advance()
+                args = self.parse_argument_list()
+
+                self.assert_current_token_in_set([TokenType.RIGHT_PAREN])
+                self.advance()
+
+                return FunctionCallASTNode(val, args)
+            else:
+                return IndentiferASTNode(val)
+
         elif self.current_token.type == TokenType.NUMBER:
             val = self.current_token.literal
             self.advance()
@@ -97,6 +136,7 @@ class Parser:
                         TokenType.PLUS,
                         TokenType.MINUS,
                         TokenType.RIGHT_DOUBLE_CURLY_PAREN,
+                        TokenType.COMMA,
                     ]
                 )
                 break
@@ -127,6 +167,7 @@ class Parser:
                         TokenType.MULTIPLY,
                         TokenType.DIVIDE,
                         TokenType.RIGHT_DOUBLE_CURLY_PAREN,
+                        TokenType.COMMA,
                     ]
                 )
                 break
