@@ -2,6 +2,13 @@
 
 
 
+## v0.4.0 (2024-03-17)
+
+### Feature
+
+* feat: add basic numerical functions ([`9e2489f`](https://github.com/eugene-prout/yatla/commit/9e2489f559a083141154fa5eef78fb2075bb5d81))
+
+
 ## v0.3.0 (2024-03-17)
 
 ### Feature
