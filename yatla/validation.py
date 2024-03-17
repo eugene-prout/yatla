@@ -1,10 +1,22 @@
 from dataclasses import dataclass
+from enum import Enum
 from itertools import groupby
 from operator import attrgetter
 
-from click import Parameter
-from yatla.ast_nodes import Constraint, Type
 
+class Type(Enum):
+    String = 1
+    Num = 2
+    Any = 3
+    StringArray = 4
+    NumArray = 5
+    AnyArray = 6
+
+
+@dataclass(frozen=True)
+class Constraint:
+    identifier: str
+    type: Type
 
 @dataclass
 class Parameter:

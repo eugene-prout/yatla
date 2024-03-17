@@ -23,10 +23,11 @@ class TokenType(Enum):
 
     #   Keywords.
     FOREACH = 12
-    IN = 13
+    ENDFOREACH = 13
+    IN = 14
 
-    NEWLINE = 14
-    EOF = 15
+    NEWLINE = 15
+    EOF = 16
 
 
 @dataclass
@@ -91,6 +92,8 @@ class Scanner:
             return self.add_token(TokenType.NUMBER, int(value))
         elif value == "foreach":
             return self.add_token(TokenType.FOREACH)
+        elif value == "endforeach":
+            return self.add_token(TokenType.ENDFOREACH)
         elif value == "in":
             return self.add_token(TokenType.IN)
         else:

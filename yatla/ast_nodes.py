@@ -2,18 +2,24 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
+import operator
 from typing import Callable, Optional
 
+from yatla.validation import Constraint, Type, convert_to_shared_subtype
 
-class Type(Enum):
-    String = 1
-    Num = 2
-    Any = 3
+class BuiltinFunctionType(Enum):
+    # Arithmetic 
+    ADD = 1
+    SUBTRACT = 2
+    MULTIPLY = 3
+    DIVIDE = 4
 
-@dataclass(frozen=True)
-class Constraint:
-    identifier: str
-    type: Type
+FUNCTION_LOOKUP = {
+    BuiltinFunctionType.ADD: operator.__add__,
+    BuiltinFunctionType.SUBTRACT: operator.__sub__,
+    BuiltinFunctionType.MULTIPLY: operator.__mul__,
+    BuiltinFunctionType.DIVIDE: operator.__truediv__
+}
 
 
 class ASTNode:
@@ -117,6 +123,52 @@ class LineASTNode(ASTNode):
                 all_params.extend(val)
         return [p for p in all_params if p is not None]
 
+@dataclass
+class EndForEachBlockASTNode():
+    pass
+
+@dataclass
+class ForEachBlockASTNode(ASTNode):
+    iterand: str
+    iterator: str
+    body: list[LineASTNode]
+
+    def eval(self, context):
+        iterator = context[self.iterator]
+        output = []
+        for value in iterator:
+            context_with_iterator = context | {self.iterand: value}
+            output.append("\n".join(l.eval(context_with_iterator) for l in self.body))
+        return "\n".join(output)
+
+    def get_parameters(self, type: Type = None) -> list[Optional[Constraint]]:
+        body_params: list[Constraint] = []
+        for node in self.body:
+            if val := node.get_parameters():
+                body_params.extend(val)
+
+        iterand_types = [p.type for p in body_params if p.identifier == self.iterand]
+        
+
+        iterand_type = None
+        if len(iterand_types) == 1:
+            iterand_type = iterand_types[0]
+        elif set(iterand_types) == set([Type.Any, Type.Num]):
+            iterand_type = Type.Num
+        else:
+            raise ValueError("Using array of mixed type")
+        
+        iterator_type = None
+        if iterand_type == Type.Num:
+            iterator_type = Type.NumArray
+        elif iterand_type == Type.Any:
+            iterator_type = Type.AnyArray
+        else:
+            raise ValueError("Created array with invalid type of iterator")
+
+        body_params = [p for p in body_params if p.identifier != self.iterand]
+        body_params.append(Constraint(self.iterator, iterator_type))
+        return body_params
 
 @dataclass
 class DocumentASTNode(ASTNode):

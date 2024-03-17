@@ -1,5 +1,4 @@
-This is the starter template.
-
-This line contains a {{ slot }}.
-
-Slots can also contain mathematical expressions: {{ 3 + factor * 7 }}.
+This is the {{ factor }} times table:
+{{ foreach num in num_list }}
+{{ factor }} * {{ num }} = {{ factor * num }}
+{{ endforeach }}
