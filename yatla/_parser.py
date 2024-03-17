@@ -2,6 +2,7 @@ from __future__ import annotations
 import operator
 from yatla.ast_nodes import (
     BinOpASTNode,
+    BuiltinFunctionType,
     DocumentASTNode,
     EndForEachBlockASTNode,
     ExpressionASTNode,
@@ -92,8 +93,8 @@ class Parser:
 
         while True:
             operator_map = {
-                TokenType.MULTIPLY: operator.mul,
-                TokenType.DIVIDE: operator.truediv,
+                TokenType.MULTIPLY: BuiltinFunctionType.MULTIPLY,
+                TokenType.DIVIDE: BuiltinFunctionType.DIVIDE,
             }
 
             if self.current_token.type in operator_map.keys():
@@ -122,8 +123,8 @@ class Parser:
 
         while True:
             operator_map = {
-                TokenType.PLUS: operator.add,
-                TokenType.MINUS: operator.sub,
+                TokenType.PLUS: BuiltinFunctionType.ADD,
+                TokenType.MINUS: BuiltinFunctionType.SUBTRACT,
             }
 
             if self.current_token.type in operator_map.keys():

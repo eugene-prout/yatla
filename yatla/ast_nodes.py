@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 import operator
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 
 from yatla.validation import Constraint, Type, convert_to_shared_subtype
 
@@ -14,7 +14,7 @@ class BuiltinFunctionType(Enum):
     MULTIPLY = 3
     DIVIDE = 4
 
-FUNCTION_LOOKUP = {
+FUNCTION_LOOKUP: dict[str, Callable[[Any, Any], Any]] = {
     BuiltinFunctionType.ADD: operator.__add__,
     BuiltinFunctionType.SUBTRACT: operator.__sub__,
     BuiltinFunctionType.MULTIPLY: operator.__mul__,
@@ -70,10 +70,11 @@ class ExpressionASTNode(ASTNode):
 class BinOpASTNode(ASTNode):
     lhs: BinOpASTNode | NumberASTNode
     rhs: BinOpASTNode | NumberASTNode
-    operator: Callable[[int, int], int]
+    operator_type: BuiltinFunctionType
 
     def eval(self, context):
-        return self.operator(self.lhs.eval(context), self.rhs.eval(context))
+        function = FUNCTION_LOOKUP[self.operator_type]
+        return function(self.lhs.eval(context), self.rhs.eval(context))
 
     def get_parameters(self, type: Type = None) -> list[Optional[Constraint]]:
         all_parameters = []
