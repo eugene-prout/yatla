@@ -2,6 +2,25 @@
 
 
 
+## v0.3.0 (2024-03-17)
+
+### Feature
+
+* feat: add bounded iteration
+
+feat: add bounded iteration ([`a1759b4`](https://github.com/eugene-prout/yatla/commit/a1759b49af24cd050a06eeabb19b8f4dc48743ca))
+
+### Unknown
+
+* Run formatter ([`9d9e857`](https://github.com/eugene-prout/yatla/commit/9d9e85771c136ce67d4a9d4263f179bb5f1a2572))
+
+* Bug fixes ([`7be855f`](https://github.com/eugene-prout/yatla/commit/7be855f4f683e5c85c93988dd4479b3f54c7eddd))
+
+* store function type instead of expression ([`caf02d7`](https://github.com/eugene-prout/yatla/commit/caf02d7215d734a4a03aefcdaf80b1df027d91c8))
+
+* Add foreach blocks ([`0cd54b1`](https://github.com/eugene-prout/yatla/commit/0cd54b1a26766de4acb3eb911af4d1cfb4e9f3b1))
+
+
 ## v0.2.0 (2024-03-03)
 
 ### Feature
