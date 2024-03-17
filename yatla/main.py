@@ -42,6 +42,14 @@ def eval(filepath, data: tuple[str, ...]):
             data[k] = int(value)
         elif re.match(r"^-?\d+\.\d+$", value):
             data[k] = float(value)
+        elif value[0] == "[" and value[-1] == "]":
+            lst = value[1:-1].split(",")
+            if all(re.match(r"^-?\d+", v) for v in lst):
+                data[k] = [int(v) for v in lst]
+            elif all(re.match(r"^-?\d+\.\d+$", v) for v in lst):
+                data[k] = [float(v) for v in lst]
+            else:
+                data[k] = lst
 
     print(doc.eval(data))
 
@@ -56,8 +64,10 @@ def type(filepath):
 
     print(paramters)
 
+
 def main():
     cli()
+
 
 if __name__ == "__main__":
     main()

@@ -1,9 +1,22 @@
 from dataclasses import dataclass
+from enum import Enum
 from itertools import groupby
 from operator import attrgetter
 
-from click import Parameter
-from yatla.ast_nodes import Constraint, Type
+
+class Type(Enum):
+    String = 1
+    Num = 2
+    Any = 3
+    StringArray = 4
+    NumArray = 5
+    AnyArray = 6
+
+
+@dataclass(frozen=True)
+class Constraint:
+    identifier: str
+    type: Type
 
 
 @dataclass
@@ -20,7 +33,9 @@ def make_unique(constraints: list[Constraint]):
     return list(dict.fromkeys(constraints))
 
 
-def group_constraints_by_identifier(constraints: list[Constraint]):
+def group_constraints_by_identifier(
+    constraints: list[Constraint],
+) -> dict[str, list[Type]]:
     sorted_constraints = sorted(constraints, key=attrgetter("identifier"))
 
     grouped_constraints = {}
@@ -36,7 +51,7 @@ def convert_to_shared_subtype(constraints: list[Constraint]):
     for identifier, c in grouped.items():
         new_type = None
         if len(c) == 1:
-            new_type = c
+            new_type = c[0]
         else:
             if set(c) == set([Type.Any, Type.Num]):
                 new_type = Type.Num
