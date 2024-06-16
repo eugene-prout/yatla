@@ -15,6 +15,7 @@ from yatla.ast_nodes import (
 
 
 from yatla.lexer import Token, TokenType, Scanner
+from yatla.template import Slot, Template
 
 
 class TokenSource:
@@ -380,7 +381,19 @@ class Parser:
             raise ValueError(message)
 
 
-def parse(l: Scanner):
+def parse(source: str) -> Template:
+    """
+    Given a template source as a string, parse the template into a Template object. This method also verifies that a template is valid.
+    """
+    lexer = Scanner(source)
+    token_buffer = TokenSource(lexer)
+    parser = Parser(token_buffer)
+    parsed_template = parser.parse_document()
+    slots = [Slot(c.identifier, c.type) for c in parsed_template.get_parameters()]
+    return Template(parsed_template, source, slots)
+
+
+def parse_from_scanner(l: Scanner):
     token_buffer = TokenSource(l)
     parser = Parser(token_buffer)
     return parser.parse_document()
