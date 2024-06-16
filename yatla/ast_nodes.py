@@ -5,7 +5,8 @@ from enum import Enum
 import operator
 from typing import Any, Callable, Optional
 
-from yatla.validation import Constraint, Type, convert_to_shared_subtype
+from yatla.types import SlotType
+from yatla.validation import Constraint, compute_parameters
 import yatla.builtins
 
 
@@ -30,10 +31,26 @@ FUNCTION_LOOKUP: dict[str, Callable[[Any, Any], Any]] = {
 }
 
 BUILTIN_FUNCTION_LOOKUP = {
-    BuiltinFunctionType.ROUNDUP: (yatla.builtins.RoundUp, 2, [Type.Num, Type.Num]),
-    BuiltinFunctionType.ROUNDDOWN: (yatla.builtins.RoundDown, 2, [Type.Num, Type.Num]),
-    BuiltinFunctionType.MINIMUM: (yatla.builtins.Minimum, 2, [Type.Num, Type.Num]),
-    BuiltinFunctionType.MAXIMUM: (yatla.builtins.Maximum, 2, [Type.Num, Type.Num]),
+    BuiltinFunctionType.ROUNDUP: (
+        yatla.builtins.RoundUp,
+        2,
+        [SlotType.Num, SlotType.Num],
+    ),
+    BuiltinFunctionType.ROUNDDOWN: (
+        yatla.builtins.RoundDown,
+        2,
+        [SlotType.Num, SlotType.Num],
+    ),
+    BuiltinFunctionType.MINIMUM: (
+        yatla.builtins.Minimum,
+        2,
+        [SlotType.Num, SlotType.Num],
+    ),
+    BuiltinFunctionType.MAXIMUM: (
+        yatla.builtins.Maximum,
+        2,
+        [SlotType.Num, SlotType.Num],
+    ),
 }
 
 
@@ -41,7 +58,7 @@ class ASTNode:
     def eval(self, context):
         raise NotImplementedError
 
-    def get_parameters(self, type: Type = None) -> list[Optional[Constraint]]:
+    def get_parameters(self, type: SlotType = None) -> list[Optional[Constraint]]:
         raise NotImplementedError
 
 
@@ -52,9 +69,9 @@ class IndentiferASTNode(ASTNode):
     def eval(self, context):
         return context[self.value]
 
-    def get_parameters(self, type: Type = None) -> list[Optional[Constraint]]:
+    def get_parameters(self, type: SlotType = None) -> list[Optional[Constraint]]:
         if type is None:
-            return [Constraint(self.value, Type.Any)]
+            return [Constraint(self.value, SlotType.Any)]
         else:
             return [Constraint(self.value, type)]
 
@@ -66,7 +83,7 @@ class NumberASTNode(ASTNode):
     def eval(self, context):
         return self.value
 
-    def get_parameters(self, type: Type = None) -> list[Optional[Constraint]]:
+    def get_parameters(self, type: SlotType = None) -> list[Optional[Constraint]]:
         return [None]
 
 
@@ -77,7 +94,7 @@ class ExpressionASTNode(ASTNode):
     def eval(self, context):
         return self.value.eval(context)
 
-    def get_parameters(self, type: Type = None) -> list[Optional[Constraint]]:
+    def get_parameters(self, type: SlotType = None) -> list[Optional[Constraint]]:
         return self.value.get_parameters(type)
 
 
@@ -95,7 +112,7 @@ class FunctionCallASTNode(ASTNode):
 
         return function(*evaluated_args)
 
-    def get_parameters(self, type: Type = None) -> list[Constraint]:
+    def get_parameters(self, type: SlotType = None) -> list[Constraint]:
         all_params = []
 
         _, _, expected_types = BUILTIN_FUNCTION_LOOKUP[self.function_identifier]
@@ -116,10 +133,10 @@ class BinOpASTNode(ASTNode):
         function = FUNCTION_LOOKUP[self.operator_type]
         return function(self.lhs.eval(context), self.rhs.eval(context))
 
-    def get_parameters(self, type: Type = None) -> list[Optional[Constraint]]:
+    def get_parameters(self, type: SlotType = None) -> list[Optional[Constraint]]:
         all_parameters = []
         arguments = [self.lhs, self.rhs]
-        parameter_types = [Type.Num, Type.Num]
+        parameter_types = [SlotType.Num, SlotType.Num]
 
         for parameter, required_type in zip(arguments, parameter_types):
             if val := parameter.get_parameters(required_type):
@@ -135,7 +152,7 @@ class ExpressionBlockASTNode(ASTNode):
     def eval(self, context):
         return str(self.value.eval(context))
 
-    def get_parameters(self, type: Type = None) -> list[Optional[Constraint]]:
+    def get_parameters(self, type: SlotType = None) -> list[Optional[Constraint]]:
         return self.value.get_parameters()
 
 
@@ -146,7 +163,7 @@ class TextASTNode(ASTNode):
     def eval(self, context):
         return self.value
 
-    def get_parameters(self, type: Type = None) -> list[Optional[Constraint]]:
+    def get_parameters(self, type: SlotType = None) -> list[Optional[Constraint]]:
         return [None]
 
 
@@ -157,7 +174,7 @@ class LineASTNode(ASTNode):
     def eval(self, context):
         return "".join(node.eval(context) for node in self.content)
 
-    def get_parameters(self, type: Type = None) -> list[Optional[Constraint]]:
+    def get_parameters(self, type: SlotType = None) -> list[Optional[Constraint]]:
         all_params = []
         for node in self.content:
             if val := node.get_parameters():
@@ -179,7 +196,7 @@ class ForEachBlockASTNode(ASTNode):
             output.append("\n".join(l.eval(context_with_iterator) for l in self.body))
         return "\n".join(output)
 
-    def get_parameters(self, type: Type = None) -> list[Optional[Constraint]]:
+    def get_parameters(self, type: SlotType = None) -> list[Optional[Constraint]]:
         body_params: list[Constraint] = []
         for node in self.body:
             if val := node.get_parameters():
@@ -190,16 +207,16 @@ class ForEachBlockASTNode(ASTNode):
         iterand_type = None
         if len(iterand_types) == 1:
             iterand_type = iterand_types[0]
-        elif set(iterand_types) == set([Type.Any, Type.Num]):
-            iterand_type = Type.Num
+        elif set(iterand_types) == set([SlotType.Any, SlotType.Num]):
+            iterand_type = SlotType.Num
         else:
             raise ValueError("Using array of mixed type")
 
         iterator_type = None
-        if iterand_type == Type.Num:
-            iterator_type = Type.NumArray
-        elif iterand_type == Type.Any:
-            iterator_type = Type.AnyArray
+        if iterand_type == SlotType.Num:
+            iterator_type = SlotType.NumArray
+        elif iterand_type == SlotType.Any:
+            iterator_type = SlotType.AnyArray
         else:
             raise ValueError("Created array with invalid type of iterator")
 
@@ -215,8 +232,9 @@ class DocumentASTNode(ASTNode):
     def eval(self, context):
         return "\n".join(l.eval(context) for l in self.lines)
 
-    def get_parameters(self, type: Type = None) -> list[Constraint]:
+    def get_parameters(self, type: SlotType = None) -> list[Constraint]:
         params = []
         for line in self.lines:
             params.extend(line.get_parameters())
-        return params
+        validated_params = compute_parameters(params)
+        return validated_params

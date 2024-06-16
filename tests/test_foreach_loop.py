@@ -1,4 +1,4 @@
-from yatla._parser import parse
+from yatla.parser import parse_from_scanner
 from yatla.ast_nodes import (
     BinOpASTNode,
     BuiltinFunctionType,
@@ -20,7 +20,7 @@ def test_foreach_parsing():
         "{{ endforeach }}"
     )  # fmt: skip
 
-    ast = parse(Scanner(template))
+    ast = parse_from_scanner(Scanner(template))
 
     expected = DocumentASTNode(
         lines=[
@@ -73,7 +73,7 @@ def test_foreach_with_endforeach_being_last_token_in_file():
         "{{ endforeach }}"
     )  # fmt: skip
 
-    ast = parse(Scanner(template))
+    ast = parse_from_scanner(Scanner(template))
 
     expected = DocumentASTNode(
         lines=[

@@ -11,8 +11,9 @@ from yatla.ast_nodes import (
     TextASTNode,
 )
 from yatla.lexer import Scanner
-from yatla._parser import parse
-from yatla.validation import Parameter, Type, compute_parameters
+from yatla.parser import parse_from_scanner
+from yatla.types import SlotType
+from yatla.validation import Constraint, compute_parameters
 
 
 def test_parsing():
@@ -32,7 +33,7 @@ def test_parsing():
         "{{ endforeach }}"
     )  # fmt: skip
 
-    ast = parse(Scanner(template))
+    ast = parse_from_scanner(Scanner(template))
 
     expected = DocumentASTNode(
         lines=[
@@ -151,14 +152,14 @@ def test_typing():
         "{{ endforeach }}"
     )  # fmt: skip
 
-    ast = parse(Scanner(template))
+    ast = parse_from_scanner(Scanner(template))
 
-    slots = compute_parameters(ast.get_parameters())
+    slots = ast.get_parameters()
 
     expected = [
-        Parameter(identfier="factor", type=Type.Num),
-        Parameter(identfier="num_list", type=Type.NumArray),
-        Parameter(identfier="slot", type=Type.Any),
+        Constraint(identifier="factor", type=SlotType.Num),
+        Constraint(identifier="num_list", type=SlotType.NumArray),
+        Constraint(identifier="slot", type=SlotType.Any),
     ]
 
     assert slots == expected
@@ -181,7 +182,7 @@ def test_eval():
         "{{ endforeach }}"
     )  # fmt: skip
 
-    ast = parse(Scanner(template))
+    ast = parse_from_scanner(Scanner(template))
 
     context = {"slot": "filled slot", "factor": 2, "num_list": [1, 2, 3, 4, 5]}
 
