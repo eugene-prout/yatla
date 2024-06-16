@@ -1,28 +1,14 @@
 from dataclasses import dataclass
-from enum import Enum
 from itertools import groupby
 from operator import attrgetter
 
-
-class Type(Enum):
-    String = 1
-    Num = 2
-    Any = 3
-    StringArray = 4
-    NumArray = 5
-    AnyArray = 6
+from yatla.types import SlotType
 
 
 @dataclass(frozen=True)
 class Constraint:
     identifier: str
-    type: Type
-
-
-@dataclass
-class Parameter:
-    identfier: str
-    type: Type
+    type: SlotType
 
 
 def check_validity(constraints: list[Constraint]):
@@ -35,7 +21,7 @@ def make_unique(constraints: list[Constraint]):
 
 def group_constraints_by_identifier(
     constraints: list[Constraint],
-) -> dict[str, list[Type]]:
+) -> dict[str, list[SlotType]]:
     sorted_constraints = sorted(constraints, key=attrgetter("identifier"))
 
     grouped_constraints = {}
@@ -53,22 +39,18 @@ def convert_to_shared_subtype(constraints: list[Constraint]):
         if len(c) == 1:
             new_type = c[0]
         else:
-            if set(c) == set([Type.Any, Type.Num]):
-                new_type = Type.Num
+            if set(c) == set([SlotType.Any, SlotType.Num]):
+                new_type = SlotType.Num
 
         new_constraints.append(Constraint(identifier, new_type))
 
     return new_constraints
 
 
-def convert_constraint_to_parameter(constraint: Constraint):
-    return Parameter(constraint.identifier, constraint.type)
-
-
-def compute_parameters(constraints: list[Constraint]) -> list[Parameter]:
+def compute_parameters(constraints: list[Constraint]) -> list[Constraint]:
     constraints = make_unique(constraints)
     if not check_validity(constraints):
         raise ValueError("Invalid constraints")
 
     constraints = convert_to_shared_subtype(constraints)
-    return [convert_constraint_to_parameter(c) for c in constraints]
+    return constraints
