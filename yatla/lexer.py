@@ -47,6 +47,7 @@ class Token:
     for example, a token of TokenType.STRING will have the string's literal value in the literal
     field.
     """
+
     type: TokenType
     lexeme: str
     literal: Optional[str | int | float]

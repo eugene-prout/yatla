@@ -10,4 +10,3 @@ def test_multiple_slots_of_same_name():
     parameters = parsed_template.get_parameters()
 
     assert parameters == [Constraint("factor", SlotType.Num)]
-    
