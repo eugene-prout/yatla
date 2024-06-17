@@ -30,7 +30,7 @@ Statically typed templates::
    'Hello, world!'
    >>> template = yatla.parse("{{ factor }} * 2 = {{ factor * 2 }}")
    >>> template.slots
-   [Slot(name='name', type=<SlotType.Any: 3>)]
+   [Slot(name='factor', type=<SlotType.Num: 2>)]
    >>> template.fill({"factor": 3})
    '3 * 2 = 6'
 
