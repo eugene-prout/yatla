@@ -2,6 +2,31 @@
 
 
 
+## v0.5.0 (2025-02-14)
+
+### Feature
+
+* feat: update docs ([`387b98d`](https://github.com/eugene-prout/yatla/commit/387b98d81ce263d3d88ddf51c5ce1f190d175287))
+
+### Unknown
+
+* Fix docs ([`d9624cf`](https://github.com/eugene-prout/yatla/commit/d9624cfa5b6f74883123d69bdf298baa65ded7c0))
+
+* Add poetry to docs ci ([`3718b14`](https://github.com/eugene-prout/yatla/commit/3718b14c0a173ba421fb5085f2ee6efffbcd4366))
+
+* Merge branch &#39;main&#39; of github.com:eugene-prout/yatla into main ([`8712c97`](https://github.com/eugene-prout/yatla/commit/8712c97ac572755091ac8db14f0b4dd7c2a0b751))
+
+* Add readthedocs pipeline file ([`b8d858f`](https://github.com/eugene-prout/yatla/commit/b8d858f0fc307968f68ac5115bd06860342dd5f2))
+
+* Merge pull request #2 from eugene-prout/add-documentation
+
+Add documentation ([`23db302`](https://github.com/eugene-prout/yatla/commit/23db3023c6e1d46c8c0a71531cc869efeb50972f))
+
+* Run formatter ([`831e780`](https://github.com/eugene-prout/yatla/commit/831e780efd7fce5b6454af582ffca4af8a7bb0d7))
+
+* Add documentation ([`970e77a`](https://github.com/eugene-prout/yatla/commit/970e77aa93113ee3da5c94ba5232dcd35e54d9fd))
+
+
 ## v0.4.0 (2024-03-17)
 
 ### Feature

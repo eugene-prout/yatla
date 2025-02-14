@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "yatla"
-version = "0.4.0"
+version = "0.5.0"
 description = "A templating engine with a simple templating language specifically designed for type inference, allowing consumers to provide users with slots of determined types."
 authors = ["Eugene Prout <eugene.prout1@gmail.com>"]
 license = "MIT"
