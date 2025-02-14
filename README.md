@@ -40,7 +40,8 @@ Comparing {{ factor }} and {{ num }}, the largest is {{ Maximum(factor, num) }} 
 ```
 
 From the template above, YATLA will identify the parameters in the template, and infer their types:
-- `slot`: string or number 
+
+- `slot`: string or number
 - `factor`: number
 - `num`: number
 - `num_list`: number array
